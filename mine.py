@@ -1,9 +1,12 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for,flash , session
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
+from flask_login import login_required,logout_user,current_user,login_user,LoginManager, UserMixin
+from flask_mysqldb import MySQL
+
 
 
 app = Flask(__name__)
@@ -11,7 +14,9 @@ app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///home/prachiti/Desktop/proj/database.db'
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
-
+login_manager= LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,9 +37,17 @@ class RegisterForm(FlaskForm):
     password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
 
 
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'parkar123'
+app.config['MYSQL_DB'] = 'myflaskapp'
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+
+mysql=MySQL(app)
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('signup'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -45,7 +58,7 @@ def login():
 		user = User.query.filter_by(username=form.username.data).first()
 		if user:
 			if user.password==form.password.data:
-				return "entered"
+				return redirect(url_for('dashboard'))
 
 		return '<h1>Invalid username or password</h1>'
 	return render_template('login.html',form=form)
@@ -60,10 +73,27 @@ def signup():
         db.session.add(new_user)
         db.session.commit()
 
-        return '<h1>New user has been created!</h1>'
+        return redirect(url_for('login'))
         
 
     return render_template('signup.html', form=form)
+
+@app.route('/dashboard')
+def dashboard():
+    cur = mysql.connection.cursor()
+    cur.execute("select * from dashboard order by ID")
+    data= cur.fetchall()
+
+    return render_template('dashboard.html',data=data)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    #flash "you have now logged out"
+    return redirect(url_for('login'))
+#use url_for for dashboard and redirect it here
+
 
 
 
