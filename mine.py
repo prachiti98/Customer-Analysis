@@ -80,11 +80,36 @@ def signup():
 
 @app.route('/dashboard')
 def dashboard():
+    flash ('Customer details')
     cur = mysql.connection.cursor()
     cur.execute("select * from dashboard order by ID")
     data= cur.fetchall()
 
     return render_template('dashboard.html',data=data)
+
+@app.route('/profit')
+
+def profit():
+    cur = mysql.connection.cursor()
+    cur.execute("select ID,CUSTOMER_NAME,PRODUCT_NAME,PROFIT_PERCENTAGE FROM dashboard order by PROFIT_PERCENTAGE")
+    data = cur.fetchall()
+
+    return render_template('profit.html',data=data)
+
+@app.route('/bestcustomer')
+def bestcustomer():
+    return render_template('bestcustomer.html')
+
+
+
+@app.route('/bestproduct')
+def bestproduct():
+    cur = mysql.connection.cursor()
+    cur.execute("select PRODUCT_NAME,PROFIT_PERCENTAGE FROM dashboard WHERE PROFIT_PERCENTAGE >= ALL (SELECT PROFIT_PERCENTAGE FROM dashboard group by PRODUCT_NAME,PROFIT_PERCENTAGE) GROUP BY PRODUCT_NAME,PROFIT_PERCENTAGE")
+    data=cur.fetchone()
+
+    return render_template('bestproduct.html',data=data)
+
 
 @app.route('/logout')
 @login_required
