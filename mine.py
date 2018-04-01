@@ -6,6 +6,7 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from flask_login import login_required,logout_user,current_user,login_user,LoginManager, UserMixin
 from flask_mysqldb import MySQL
+import matplotlib.pyplot as plt
 
 
 
@@ -16,8 +17,6 @@ bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 login_manager= LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), unique=True)
@@ -79,6 +78,7 @@ def signup():
     return render_template('signup.html', form=form)
 
 @app.route('/dashboard')
+
 def dashboard():
     flash ('Customer details')
     cur = mysql.connection.cursor()
@@ -90,6 +90,7 @@ def dashboard():
 @app.route('/profit')
 
 def profit():
+    flash ('Profit till date')
     cur = mysql.connection.cursor()
     cur.execute("select ID,CUSTOMER_NAME,PRODUCT_NAME,PROFIT_PERCENTAGE FROM dashboard order by PROFIT_PERCENTAGE")
     data = cur.fetchall()
@@ -98,12 +99,16 @@ def profit():
 
 @app.route('/bestcustomer')
 def bestcustomer():
-    return render_template('bestcustomer.html')
+    cur = mysql.connection.cursor()
+    cur.execute("select * from v1")
+    data = cur.fetchone()
+    return render_template('bestcustomer.html',data=data)
 
 
 
 @app.route('/bestproduct')
 def bestproduct():
+    flash ('Best Product')
     cur = mysql.connection.cursor()
     cur.execute("select PRODUCT_NAME,PROFIT_PERCENTAGE FROM dashboard WHERE PROFIT_PERCENTAGE >= ALL (SELECT PROFIT_PERCENTAGE FROM dashboard group by PRODUCT_NAME,PROFIT_PERCENTAGE) GROUP BY PRODUCT_NAME,PROFIT_PERCENTAGE")
     data=cur.fetchone()
@@ -112,13 +117,20 @@ def bestproduct():
 
 
 @app.route('/logout')
-@login_required
 def logout():
     logout_user()
-    #flash "you have now logged out"
+    flash ('You have now logged out')
     return redirect(url_for('login'))
 #use url_for for dashboard and redirect it here
 
+@app.route('/graphs')
+def graphs():
+    
+    plt.plot([1,2,3,4])
+    plt.ylabel('some numbers')
+    plt.show()
+
+    return "graphs"
 
 
 

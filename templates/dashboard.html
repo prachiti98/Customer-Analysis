@@ -2,8 +2,8 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-	Hello user
 	
+	<br>
 	<table class="Dashboard" border="10" width="100%">
 		<thead>
 		<tr>
@@ -11,7 +11,7 @@
 			<th>CUSTOMER-NAME</th>
 			<th>PRODUCT-NAME</th>
 			<th>AMOUNT</th>
-			<th>COSTPRICE</th>
+			<th>COSTAMOUNT</th>
 			
 			
 		</tr>
@@ -24,15 +24,14 @@
 					<td>{{x.PRODUCT_NAME}}</td>
 					<td>{{x.AMOUNT}}</td>
 					<td>{{x.COSTPRICE}}</td>
-						
-
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 	<a class = "btn btn-default" href= "{{ url_for('profit') }}" >Get Profits</a>
     <a class = "btn btn-default" href= "{{ url_for('bestcustomer') }}" >Best Customer</a>
-    <a class = "btn btn-default" href= "{{ url_for('bestproduct') }}" >Best Product</a>   
+    <a class = "btn btn-default" href= "{{ url_for('bestproduct') }}" >Best Product</a> 
+    <a class = "btn btn-default" href= "{{ url_for('graphs') }}" >Graphical Analysis</a>  
 			
 
 {% endblock %}
